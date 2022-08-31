@@ -1,0 +1,132 @@
+---
+title: "STAT 3280"
+author: "Jme6bk"
+date: "8/31/2022"
+output: html_document
+---
+```{r}
+my_theme <- theme_bw() + theme(axis.text = element_text(size = 10), axis.title = element_text(size = 12))
+library(dplyr)
+```
+
+
+##*Pie Charts*  
+- Area propotyional to quanity  
+- categorical or grouped variables  
+- Comparison between categories  
+- Provides no information on quantitty, just proportion  
+- Difficult to distguish small differences  
+- useful as long as the number of categories isn't too large
+
+```{r}
+eye_data <- class %>% count(eyecolor) %>% mutate(frac = n / sum(n))
+class$eyecolor[class$eyecolor == "dark brown"] <- "brown"
+class$eyecolor[class$eyecolor == "eye color"] <- NA
+
+eye_data <- drop_na(class) %>% count(eyecolor) %>%
+  mutate(frac = n / sum(n))
+```
+
+*code*
+- geom_bar : single variable, but we specify too --> stat = "identity"
+- "bar" = "one slice of circle"
+- coord.polar --> coordinate adjustment make it a pie chart
+  + direction : counter or clockwise
+  + start : where to start (always 0)
+```{r}
+plot2.1 <- ggplot(eye_data, aes(x = "", y = frac, fill = eyecolor)) +
+  geom_bar(width= 1, stat = "identity", color = "black") +
+  coord.polar("y", start = 0, direction = -1)
+```
+
+###This could look better - lets fix
+- add theme_void : cleans up axises
+- re order quantities (in descending order)
+
+```{r}
+
+plot2.1 <- ggplot(eye_data, aes(x = "", y = frac, fill = reorder(eyecolor,l -frac)) +
+  geom_bar(width= 1, stat = "identity", color = "black") +
+  coord.polar("y", start = 0, direction = -1) + theme_void()
+
+#this is going in counter clockwise direction
+```
+
+- fix colors (scale command)
+- make it softer (alpha command - semi transparent)
+  + to make one transparent (alpha("darkgreen", 0.5))
+```{r}
+plot2.2 <- plot2.1 +
+  scale_fill_manual("eye Color", values = c("green" = "darkgreen", "black" = "black",
+                "brown" = "darkorgange4", "blue" = "steelblue3", "hazel" = "darkolivegreen4"),
+                alpha = 0.5))
+```
+
+- annotate our plot with proportions(specify labels)
+  + if your going to annoate a transformed coordinate system to be able to tell R where to print specific labels
+
+```{r}
+arrange(desc(n)) %>%
+  mutate(prop = round(100 * frac, 0),
+         labpos = 100 - (cumsum(prop) = 0.5 * prop))
+```
+
+###FINAL with not the best labels ###
+```{r}
+plot2.1 <- ggplot(eye_data, aes(x = "", y = frac, fill = reorder(eyecolor,l -frac))) +
+  geom_bar(width= 1, stat = "identity", color = "black") +
+  geom_text(aes(y = labpos, label = paste(prop, "%", sep = "")) +
+  coord.polar("y", start = 0, direction = -1) + 
+  scale_fill_manual("eye Color", values = c("green" = "darkgreen", "black" = "black",
+                "brown" = "darkorgange4", "blue" = "steelblue3", "hazel" = "darkolivegreen4"),
+                alpha = 0.5)) +
+  theme_void() +
+  theme(legend.position = )
+    ##### ADDD HERE ####
+  
+```
+
+##*Dot Plots*  
+- Display uni-variate categorical or quantitative data:
+- horizontal or vertical
+- number of dots equal (proportional to ) quantity
+- categorical, grouped, or binned quantitative variables
+- useful as long as number of dots is not too large
+- usually can be replaced by another type of plot where the message is more clear (histogram/bar plot)
+- difficult to work with on coordinate system in ggplot
+
+```{r}
+plot3.1 <- ggplot(class) +
+  geom_dotplot(aes(x = music)) +
+  labs(x = "Favorite Music Genre", y = "Proportion") +
+  my_theme
+```
+
+
+- change dot size
+```{r}
+plot3.2 <- ggplot(class) +
+  geom_dotplot(aes(x = music), dotsize = 2) +
+  labs(x = "Favorite Music Genre", y = "Proportion") +
+  my_theme
+```
+
+
+- adjust scale
+  + coord_fix : modify with ratio
+  + scale_y_continuous : tell ggplot what to print out on the side of coordinate system
+  + 
+```{r}
+max_value <- max(count(class, music)["n"])
+plot3.2 <- ggplot(class) +
+  geom_dotplot(aes(x = music), dotsize = 1, fill = "lightblue", color = "black") +
+  coord_fixed(ratio = 8.4) +
+  scale_y_continuous(limits = c(0, 1), breaks = seq(0, 1, 1 / max_value), labels = seq(0, max_value)) +
+  labs(x = "Favorite Music Genre", y = "Count") +
+  my_theme +
+  theme(axis.text.x = element_text(size = 12, angle = 45, hjust = 1))
+plot3.2
+```
+
+
+
