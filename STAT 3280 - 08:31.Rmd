@@ -5,17 +5,21 @@ date: "8/31/2022"
 output: html_document
 ---
 ```{r}
+setwd("/Users/jillianeberhart/Desktop/Github/STAT-3280-Data-Visualization/STAT 3280 - 08:31.Rmd")
 my_theme <- theme_bw() + theme(axis.text = element_text(size = 10), axis.title = element_text(size = 12))
 library(dplyr)
+library(ggplot2)
+library(tidyverse)
+library(scales)
 ```
 
 
 ##*Pie Charts*  
-- Area propotyional to quanity  
+- Area proportional to quantity  
 - categorical or grouped variables  
 - Comparison between categories  
-- Provides no information on quantitty, just proportion  
-- Difficult to distguish small differences  
+- Provides no information on quantity, just proportion  
+- Difficult to distinguish small differences  
 - useful as long as the number of categories isn't too large
 
 ```{r}
@@ -36,18 +40,18 @@ eye_data <- drop_na(class) %>% count(eyecolor) %>%
 ```{r}
 plot2.1 <- ggplot(eye_data, aes(x = "", y = frac, fill = eyecolor)) +
   geom_bar(width= 1, stat = "identity", color = "black") +
-  coord.polar("y", start = 0, direction = -1)
+  coord_polar("y", start = 0, direction = -1)
 ```
 
 ###This could look better - lets fix
-- add theme_void : cleans up axises
+- add theme_void : cleans up Axis
 - re order quantities (in descending order)
 
 ```{r}
 
-plot2.1 <- ggplot(eye_data, aes(x = "", y = frac, fill = reorder(eyecolor,l -frac)) +
+plot2.1 <- ggplot(eye_data, aes(x = "", y = frac, fill = reorder(eyecolor,l -frac))) +
   geom_bar(width= 1, stat = "identity", color = "black") +
-  coord.polar("y", start = 0, direction = -1) + theme_void()
+  coord_polar("y", start = 0, direction = -1) + theme_void()
 
 #this is going in counter clockwise direction
 ```
@@ -56,35 +60,61 @@ plot2.1 <- ggplot(eye_data, aes(x = "", y = frac, fill = reorder(eyecolor,l -fra
 - make it softer (alpha command - semi transparent)
   + to make one transparent (alpha("darkgreen", 0.5))
 ```{r}
-plot2.2 <- plot2.1 +
-  scale_fill_manual("eye Color", values = c("green" = "darkgreen", "black" = "black",
-                "brown" = "darkorgange4", "blue" = "steelblue3", "hazel" = "darkolivegreen4"),
-                alpha = 0.5))
+plot2.2 <- plot2.1 + scale_fill_manual("Eye Color", values = alpha(c("green" = "darkgreen", "black" = "black", "brown" = "darkorange4", "blue" = "steelblue3", "hazel" = "darkolivegreen4"), 0.5))
 ```
 
 - annotate our plot with proportions(specify labels)
   + if your going to annoate a transformed coordinate system to be able to tell R where to print specific labels
 
 ```{r}
-arrange(desc(n)) %>%
-  mutate(prop = round(100 * frac, 0),
-         labpos = 100 - (cumsum(prop) = 0.5 * prop))
+eye_data <- eye_data %>% arrange(desc(n)) %>% mutate(prop = round(100 * frac, 0), labpos = 100 - (cumsum(prop) - 0.5 * prop))
+
 ```
 
 ###FINAL with not the best labels ###
 ```{r}
-plot2.1 <- ggplot(eye_data, aes(x = "", y = frac, fill = reorder(eyecolor,l -frac))) +
-  geom_bar(width= 1, stat = "identity", color = "black") +
-  geom_text(aes(y = labpos, label = paste(prop, "%", sep = "")) +
-  coord.polar("y", start = 0, direction = -1) + 
-  scale_fill_manual("eye Color", values = c("green" = "darkgreen", "black" = "black",
-                "brown" = "darkorgange4", "blue" = "steelblue3", "hazel" = "darkolivegreen4"),
-                alpha = 0.5)) +
-  theme_void() +
-  theme(legend.position = )
-    ##### ADDD HERE ####
+plot2.3 <- ggplot(eye_data, aes(x = "", y = prop, fill = reorder(eyecolor, -prop))) +
+  geom_bar(width = 1, stat = "identity", color = "black") +
+  geom_text(aes(y = labpos, label = paste(prop, "%", sep = ""))) +
+  coord_polar("y", start = 0, direction = 1) + 
+  scale_fill_manual("Eye Color", values = alpha(c("green" = "darkgreen", "black" = "black", "brown" = "darkorange4", "blue" = "steelblue3", "hazel" = "darkolivegreen4"), 0.5)) +
+  theme_void()
+plot2.3
   
 ```
+
+- Annotate with title
+```{r}
+plot2.5 <- ggplot(eye_data, aes(x = "", y = prop, fill = reorder(eyecolor, -prop))) +
+  geom_bar(width = 1, stat = "identity", color = "black") +
+  geom_text(aes(y = labpos, label = paste(str_to_title(eyecolor), "\n", prop, "%", sep = ""))) +
+  coord_polar("y", start = 0, direction = 1) + 
+  scale_fill_manual("Eye Color", values = alpha(c("green" = "darkgreen", "black" = "black", "brown" = "darkorange4", "blue" = "steelblue3", "hazel" = "darkolivegreen4"), 0.5)) +
+  theme_void() +
+  theme(legend.position = "none") + 
+  labs(title = "Eye Color in STAT 3280")
+plot2.5
+```
+
+- Annotate with count
+```{r}
+plot2.6 <- ggplot(eye_data, aes(x = "", y = prop, fill = reorder(eyecolor, -prop))) +
+  geom_bar(width = 1, stat = "identity", color = "black") +
+  geom_text(aes(y = labpos, label = paste(str_to_title(eyecolor), "\n", prop, "%", "\n n = ", n, sep = ""))) +
+  coord_polar("y", start = 0, direction = 1) + 
+  scale_fill_manual("Eye Color", values = alpha(c("green" = "darkgreen", "black" = "black", "brown" = "darkorange4", "blue" = "steelblue3", "hazel" = "darkolivegreen4"), 0.5)) +
+  theme_void() +
+  theme(legend.position = "none") + 
+  labs(title = "Eye Color in STAT 3280")
+plot2.6
+```
+
+- declutter
+```{r}
+plot2.6 <- plot2.6 + labs(title = paste("Eye Color in STAT 3280, n = ", sum(eye_data$n), " students", sep = ""))
+plot2.6
+```
+
 
 ##*Dot Plots*  
 - Display uni-variate categorical or quantitative data:
@@ -100,6 +130,7 @@ plot3.1 <- ggplot(class) +
   geom_dotplot(aes(x = music)) +
   labs(x = "Favorite Music Genre", y = "Proportion") +
   my_theme
+plot3.1
 ```
 
 
@@ -109,8 +140,8 @@ plot3.2 <- ggplot(class) +
   geom_dotplot(aes(x = music), dotsize = 2) +
   labs(x = "Favorite Music Genre", y = "Proportion") +
   my_theme
+plot3.2
 ```
-
 
 - adjust scale
   + coord_fix : modify with ratio
@@ -128,5 +159,57 @@ plot3.2 <- ggplot(class) +
 plot3.2
 ```
 
+- Quantitative Dot Sizes
+```{r}
+plot3.3 <- ggplot(class) +
+  geom_dotplot(aes(x = hours), method = "histodot") +
+  labs(x = "Hours Enrolled", y = "Proportion") +
+  my_theme
+plot3.3
+```
+
+```{r}
+max_value <- max(count(class, hours)["n"])
+
+plot3.4 <- ggplot(class) +
+  geom_dotplot(aes(x = hours), method = "histodot", binwidth = 1, dotsize = 1) +
+  coord_fixed(ratio = max_value) +
+  scale_y_continuous(limits = c(0, 1), breaks = seq(0, 1, 1 / max_value), labels = seq(0, max_value)) +
+  labs(x = "Hours Enrolled", y = "Count") +
+  my_theme
+plot3.4
+```
+
+- Change Stackdir
+```{r}
+plot3.4 <- ggplot(class) +
+  geom_dotplot(aes(x = hours), method = "histodot", binwidth = 1, dotsize = 1, stackdir = "down") +
+  coord_fixed(ratio = max_value) +
+  scale_y_continuous(limits = c(-1, 0), breaks = seq(0, -1, -1 / max_value), labels = seq(0, max_value)) +
+  labs(x = "Hours Enrolled", y = "Count") +
+  my_theme
+plot3.4
+```
+
+- Change stacked ratio
+
+```{r}
+plot3.5 <- ggplot(class) +
+  geom_dotplot(aes(x = hours), method = "histodot", binwidth = 1, dotsize = 1, stackratio = 0.5, fill = "lightblue") +
+  coord_fixed(ratio = 0.5 * max_value) +
+  scale_y_continuous(limits = c(0, 1), breaks = seq(0, 1, 1 / max_value), labels = seq(0, max_value)) +
+  labs(x = "Hours Enrolled", y = "Count") +
+  my_theme
+plot3.5
+
+plot3.6 <- ggplot(class) +
+  geom_dotplot(aes(x = hours), fill = "lightblue", color = "black", method = "histodot", binwidth = 1, dotsize = 1) +
+  coord_fixed(ratio = max_value) +
+  scale_y_continuous(limits = c(0, 1), breaks = seq(0, 1, 1 / max_value), labels = seq(0, max_value)) +
+  labs(x = "Hours Enrolled", y = "Count") +
+  my_theme
+plot3.6
+```
 
 
+- 
