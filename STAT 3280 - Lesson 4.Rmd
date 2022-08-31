@@ -1,0 +1,91 @@
+---
+title: "STAT 3280 - Lesson 4"
+author: "Jme6bk"
+date: "8/31/2022"
+output: html_document
+---
+## Section 4: Histograms
+
+```{r}
+library(dplyr)
+library(ggplot2)
+library(tidyverse)
+library(scales)
+
+#load in class data
+
+my_theme <- theme_bw() + theme(axis.text = element_text(size = 10), axis.title = element_text(size = 12))
+```
+
+
+- Create a histogram of student height
+```{r}
+plot4.1 <- ggplot(class, aes(x = height)) + 
+  geom_histogram() +
+  my_theme +
+  labs(x = "Height (in)", y = "Frequency")
+plot4.1
+```
+
+
+- Specify number of bins
+```{r}
+plot4.2 <- ggplot(class, aes(x = height)) + 
+  geom_histogram(bins = 20) +
+  my_theme +
+  labs(x = "Height (in)", y = "Frequency")
+plot4.2
+```
+
+
+- Add color and fill
+```{r}
+plot4.3 <- ggplot(class, aes(x = height)) + 
+  geom_histogram(bins = 20, fill = "lightblue", color = "white") +
+  my_theme +
+  labs(x = "Height (in)", y = "Frequency")
+plot4.3
+```
+
+
+- Specify bin width
+```{r}
+plot4.4 <- ggplot(class, aes(x = height)) + 
+  geom_histogram(binwidth = 2, fill = "lightblue", color = "white") +
+  my_theme +
+  labs(x = "Height (in)", y = "Frequency")
+plot4.4
+```
+
+
+- Shift center
+```{r}
+plot4.5 <- ggplot(class, aes(x = height)) + 
+  geom_histogram(binwidth = 2, center = 1, fill = "lightblue", color = "white") +
+  my_theme +
+  labs(x = "Height (in)", y = "Frequency")
+plot4.5
+```
+
+
+- Manually list breaks
+```{r}
+plot4.6 <- ggplot(class, aes(x = height)) + 
+  geom_histogram(breaks = seq(57, 100, 3), fill = "lightblue", color = "white") +
+  my_theme +
+  labs(x = "Height (in)", y = "Frequency")
+plot4.6
+```
+
+
+- Change to percent scale
+```{r}
+library(scales)
+plot4.7 <- ggplot(class, aes(x = height)) +
+  geom_histogram(aes(y = ..count.. / sum(..count..)), binwidth = 2, fill = "lightblue", color = "white") +
+  my_theme +
+  scale_y_continuous("Percent", labels = percent) +
+  labs(x = "Height (in)")
+plot4.7
+```
+
